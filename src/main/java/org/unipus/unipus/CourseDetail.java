@@ -367,4 +367,30 @@ public class CourseDetail {
             return scoreDetail;
         }
     }
+    
+// 建议添加到 CourseDetail.java 文件的末尾
+
+private static String safeGetString(JsonObject obj, String key, String defaultValue) {
+    JsonElement element = obj.get(key);
+    if (element == null || element.isJsonNull()) {
+        return defaultValue;
+    }
+    return element.getAsString();
+}
+
+private static int safeGetInt(JsonObject obj, String key, int defaultValue) {
+    JsonElement element = obj.get(key);
+    if (element == null || element.isJsonNull()) {
+        return defaultValue;
+    }
+    return element.getAsInt();
+}
+
+private static JsonObject safeGetObject(JsonObject obj, String key) {
+    JsonElement element = obj.get(key);
+    if (element == null || element.isJsonNull()) {
+        return null; // 或者返回一个空的 JsonObject
+    }
+    return element.getAsJsonObject();
+}
 }
