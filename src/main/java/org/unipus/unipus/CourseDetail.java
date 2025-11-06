@@ -45,8 +45,12 @@ public class CourseDetail {
         CourseDetail courseDetail = new CourseDetail();
         Gson gson = new Gson();
         JsonElement root = JsonParser.parseString(courseJSON);
-        courseDetail.name = root.getAsJsonObject().get("name").getAsString();
-        courseDetail.type = root.getAsJsonObject().get("type").getAsString();
+        //courseDetail.name = root.getAsJsonObject().get("name").getAsString();
+        //courseDetail.type = root.getAsJsonObject().get("type").getAsString();
+        JsonObject rootObj = root.getAsJsonObject();
+        courseDetail.name = safeGetString(rootObj, "name", ""); // 如果name为null，则使用空字符串
+        courseDetail.type = safeGetString(rootObj, "type", "");
+        courseDetail.courseType = safeGetInt(rootObj, "courseType", 0);
         List<Node> units = new ArrayList<>();
         courseDetail.units = units;
         courseDetail.nodeIndex = new HashMap<>(); // 初始化索引
@@ -60,8 +64,13 @@ public class CourseDetail {
 
     private static void traverse(Node node, JsonElement element, Gson gson, Map<String, Node> nodeIndex) {
         JsonObject jsonObject = element.getAsJsonObject();
-        node.id = jsonObject.get("id").getAsString();
-        node.role = Node.Role.valueOf(jsonObject.get("role").getAsString().toUpperCase());
+        //node.id = jsonObject.get("id").getAsString();
+        //node.role = Node.Role.valueOf(jsonObject.get("role").getAsString().toUpperCase());
+        node.id = safeGetString(jsonObject, "id", "");
+        String roleStr = safeGetString(jsonObject, "role", "");
+        if (!roleStr.isEmpty()) {
+            node.role = Node.Role.valueOf(roleStr.toUpperCase());
+        }
         node.caption = jsonObject.get("caption").getAsString();
         node.name = jsonObject.get("name").getAsString();
         if(!(node.role == Node.Role.SECTION)) {
@@ -96,7 +105,13 @@ public class CourseDetail {
             return false;
         }
 
-        JsonObject rt = root.getAsJsonObject().get("rt").getAsJsonObject();
+        //JsonObject rt = root.getAsJsonObject().get("rt").getAsJsonObject();
+        JsonObject rootObj = root.getAsJsonObject();
+        JsonObject rt = safeGetObject(rootObj, "rt");
+        if (rt == null) {
+            LOGGER.warn("Failed to initialize task times: 'rt' field is null or missing in JSON");
+            return false;
+        }
         if (!rt.has("leafs")) {
             LOGGER.warn("Failed to initialize task times: 'leafs' field not found in JSON");
             return false;
